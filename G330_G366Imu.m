@@ -1,11 +1,27 @@
-% Disclaimer:
-% --------------
-% THE SOFTWARE IS RELEASED INTO THE PUBLIC DOMAIN.
-% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
-% INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, NONINFRINGEMENT,
-% SECURITY, SATISFACTORY QUALITY, AND FITNESS FOR A PARTICULAR PURPOSE.
-% IN NO EVENT SHALL EPSON BE LIABLE FOR ANY LOSS, DAMAGE OR CLAIM, ARISING FROM OR
-% IN CONNECTION WITH THE SOFTWARE OR THE USE OF THE SOFTWARE.
+% This is free and unencumbered software released into the public domain.
+
+% Anyone is free to copy, modify, publish, use, compile, sell, or
+% distribute this software, either in source code form or as a compiled
+% binary, for any purpose, commercial or non-commercial, and by any
+% means.
+
+% In jurisdictions that recognize copyright laws, the author or authors
+% of this software dedicate any and all copyright interest in the
+% software to the public domain. We make this dedication for the benefit
+% of the public at large and to the detriment of our heirs and
+% successors. We intend this dedication to be an overt act of
+% relinquishment in perpetuity of all present and future rights to this
+% software under copyright law.
+
+% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+% EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+% IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+% OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+% ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+% OTHER DEALINGS IN THE SOFTWARE.
+
+% For more information, please refer to <https://unlicense.org>
 %
 % Epson G330 & G366 IMU derived from Epson Device Uart handle class
 
@@ -38,8 +54,8 @@ classdef G330_G366Imu < EpsonDeviceUart
         Gpio2Sel (1,:) char {mustBeMember(Gpio2Sel,{... % GPIO2 pin function selection NOTE: external trigger assumes using external trigger modeB (modeA is not supported)
             'gpio', 'ext_trigger', 'counter_reset'...
              })} = 'gpio';
-        is16G (1,1) {mustBeInteger, ... % 0=8G (default), 1=16G accelerometer output range
-            mustBeNonnegative, mustBeLessThan(is16G, 2)} = 0;
+        Set16G (1,1) {mustBeInteger, ... % 0=8G (default), 1=16G accelerometer output range
+            mustBeNonnegative, mustBeLessThan(Set16G, 2)} = 0;
     end
 
     properties(GetAccess = 'public', SetAccess = 'private', Hidden=true)
@@ -115,7 +131,7 @@ classdef G330_G366Imu < EpsonDeviceUart
 
     methods
 
-        function obj = G330_G366Imu(comport, baudrate, is16G)
+        function obj = G330_G366Imu(comport, baudrate)
         % class constructor
             if not(exist('comport', 'var'))
                 error('Error: Must specify comport');
@@ -124,10 +140,11 @@ classdef G330_G366Imu < EpsonDeviceUart
                 error('Error: Must specify baudrate');
             end
             obj@EpsonDeviceUart(comport, baudrate);
-            if (exist('is16G', 'var'))
-                obj.is16G = is16G;
-            end
             obj.getDeviceCfg();
+            if not(or(strcmpi(obj.ProdId(1:4), 'G330'), strcmpi(obj.ProdId(1:4), 'G366')))
+                fprintf('\n***Detected mismatch of Product ID and object***\n');
+                fprintf('***Check the device matches the selected class object***\n');
+            end
         end
 
         function getDeviceCfg(obj)
@@ -252,8 +269,8 @@ classdef G330_G366Imu < EpsonDeviceUart
             % Chksm16
             obj.Chksm16 = any(bitand(burstCtrl1(2), hex2dec('01')));
 
-            % is16G
-            obj.is16G = any(bitand(globCmd3(2), hex2dec('01')));
+            % Set16G
+            obj.Set16G = any(bitand(globCmd3(2), hex2dec('01')));
 
             obj.updateBytesPerBurst();
             obj.updateFieldsPerBurst();
@@ -264,7 +281,7 @@ classdef G330_G366Imu < EpsonDeviceUart
         % If not already goto CONFIG mode and program device registers
         % SMPL_CTRL, FILTER_CTRL, MSC_CTRL, BURST_CTRL,
         % SIG_CTRL, UART_CTRL based on object properties
-        % Property is16G sets the proper SF_ACC & SF_DTLV (16G vs 8G)
+        % Property Set16G sets the proper SF_ACC & SF_DTLV (16G vs 8G)
         % Will automatically enter CONFIG mode
             % Register writes need to be in CONFIG mode and flush
             % any data in input buffer
@@ -305,11 +322,14 @@ classdef G330_G366Imu < EpsonDeviceUart
             obj.setSigCtrl();
             obj.setAttiCtrl();
             obj.setUartCtrl();
-            if logical(obj.is16G)
-               obj.writeRegH(obj.GLOB_CMD3, hex2dec('1'));  % output range A_RANGE_CTRL
+            if logical(obj.Set16G)
+               obj.writeRegH(obj.GLOB_CMD3, hex2dec('1'));  % A_RANGE_CTRL=1
                obj.SF_ACC = 1/2;
                obj.SF_DLTV = 1.004e-2;
-
+            else
+               obj.writeRegH(obj.GLOB_CMD3, hex2dec('0'));  % A_RANGE_CTRL=0
+               obj.SF_ACC = 1/4;
+               obj.SF_DLTV = 5.021e-3;
             end
         end
 

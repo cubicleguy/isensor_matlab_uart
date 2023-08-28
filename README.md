@@ -1,12 +1,29 @@
 # Disclaimer
 --------------
+This is free and unencumbered software released into the public domain.
 
-THE SOFTWARE IS RELEASED INTO THE PUBLIC DOMAIN.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
-INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, NONINFRINGEMENT,
-SECURITY, SATISFACTORY QUALITY, AND FITNESS FOR A PARTICULAR PURPOSE.
-IN NO EVENT SHALL EPSON BE LIABLE FOR ANY LOSS, DAMAGE OR CLAIM, ARISING FROM OR
-IN CONNECTION WITH THE SOFTWARE OR THE USE OF THE SOFTWARE.
+Anyone is free to copy, modify, publish, use, compile, sell, or
+distribute this software, either in source code form or as a compiled
+binary, for any purpose, commercial or non-commercial, and by any
+means.
+
+In jurisdictions that recognize copyright laws, the author or authors
+of this software dedicate any and all copyright interest in the
+software to the public domain. We make this dedication for the benefit
+of the public at large and to the detriment of our heirs and
+successors. We intend this dedication to be an overt act of
+relinquishment in perpetuity of all present and future rights to this
+software under copyright law.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+For more information, please refer to <https://unlicense.org>
 
 # Purpose of this software
 -----------------------
@@ -78,11 +95,12 @@ The user is expected to modify the scripts and extend the functionality to meet 
    Accl            | Enable or disable Accl X,Y,Z 1=16bit 2=32-bit
    DeltaA          | Enable or disable Delta Angle X,Y,Z 1=16bit 2=32-bit
    DeltaV          | Enable or disable Delta Velocity X,Y,Z 1=16bit 2=32-bit
-   Quaternion      | *(Only for G365)* Enable or disable Quaternion q0,q1,q2, q3  1=16bit 2=32-bit
-   Atti            | *(Only for G365)* Enable or disable Attitude ANG1, ANG2, ANG3 1=16bit 2=32-bit
+   Quaternion      | *(Only for G330, G366, G365)* Enable or disable Quaternion q0,q1,q2, q3  1=16bit 2=32-bit
+   Atti            | *(Only for G330, G366, G365)* Enable or disable Attitude ANG1, ANG2, ANG3 1=16bit 2=32-bit
    Gpio            | Enable GPIO field in burst sample 16-bit only
    Counter         | Enable 16-bit COUNT field in burst sample
    Chksm16         | Enable 16-bit CHKSM field in burst sample
+   Set16G          | * (Only for G330, G366, G370PDG0, G370PDT0) Set accelerometer range 0=8G 1=16G
 
    #### For Accelerometer Devices:
 
@@ -101,11 +119,11 @@ The user is expected to modify the scripts and extend the functionality to meet 
 
    #### For IMU Devices
 
-   Object Property                                                        | Description
-   -----------------------------------------------------------------------|------------
-   DoutRate                                                               | 2000, 1000, 500, 250, 125, 62.5, 31.25, 15.625, 400, 200, 100, 80, 50, 40, 25, 20
-   FilterSel (All IMUs, and G370PDF1 when DoutRate=2000, 400, or 80sps)   | tap0, tap2, tap4, tap8, tap16, tap32, tap64, tap128, 32fc50, 32fc100, 32fc200, 32fc400, 64fc50, 64fc100, 64fc200, 64fc400, 128fc50, 128fc100, 128fc200, 128fc400
-   FilterSel (Only for G370PDF1 when DoutRate is not 2000, 400, or 80sps) | tap0, tap2, tap4, tap8, tap16, tap32, tap64, tap128, 32fc25, 32fc50, 32fc100, 32fc200, 64fc25, 64fc50, 64fc100, 64fc200, 128fc25, 128fc50, 128fc100, 128fc200
+   Object Property                                                                          | Description
+   -----------------------------------------------------------------------------------------|------------
+   DoutRate                                                                                 | 2000, 1000, 500, 250, 125, 62.5, 31.25, 15.625, 400, 200, 100, 80, 50, 40, 25, 20
+   FilterSel (All IMUs, and for G370PDF1 & G370PDS0 when DoutRate=2000, 400, or 80sps)      | tap0, tap2, tap4, tap8, tap16, tap32, tap64, tap128, 32fc50, 32fc100, 32fc200, 32fc400, 64fc50, 64fc100, 64fc200, 64fc400, 128fc50, 128fc100, 128fc200, 128fc400
+   FilterSel (Only for G370PDF1 & G370PDS0 when DoutRate is not 2000, 400, or 80sps)        | tap0, tap2, tap4, tap8, tap16, tap32, tap64, tap128, 32fc25, 32fc50, 32fc100, 32fc200, 64fc25, 64fc50, 64fc100, 64fc200, 128fc25, 128fc50, 128fc100, 128fc200
 
    NOTE: Refer to device datasheet for valid combinations of Output
          Rate vs Filter Selection
@@ -240,10 +258,14 @@ Quaternion      | *(Only for G365, G330, G366)* Enable or disable Quaternion q0,
 Sampling        | Status indicating SAMPLING mode
 TempC           | Enable TEMPC field in burst sample 1=16-bit 2=32-bit
 UartAuto        | Enable UART_AUTO mode (Register reading not supported when in SAMPLING mode and UART_AUTO is enabled
-isPDC1          | *(Only for G365)* 0=G365PDF1 1=G365PDC1
-isPDCA          | *(Only for G364)* 0=G364PDC0 1=G364PDCA
-isPDS0          | *(Only for G370)* 0=G370PDF1 1=G370PDS0
-is16G           | *(Only for G330, G366)* 0=8G 1=16G accelerometer output range
+Set16G           | *(Only for G330, G366)* 0=8G 1=16G accelerometer output range
+IsPDC1          | *(Only for G365)* 0=G365PDF1 1=G365PDC1
+IsPDCA          | *(Only for G364)* 0=G364PDC0 1=G364PDCA
+IsPDS0          | *(Only for G370PDF1, G370PDS0)* 0=G370PDF1 1=G370PDS0
+IsPDT0          | *(Only for G370PDG0, G370PDT0)* 0=G370PDG0 1=G370PDT0
+ProdId          | Detected device Product ID from reading device registers
+Version         | Detected device Version from reading device registers
+SerialId        | Detected device Serial Number from reading device registers
 ser             | Serial object (before Matlab 2020a) or serialport object (Matlab 2020a or later)
 
 
@@ -272,6 +294,9 @@ TiltX           | Enable Tilt for X-axis in burst sample instead of acceleration
 TiltY           | Enable Tilt for Y-axis in burst sample instead of acceleration
 TiltZ           | Enable Tilt for Z-axis in burst sample instead of acceleration
 UartAuto        | Enable UART_AUTO mode (Register reading not supported when in SAMPLING mode and UART_AUTO is enabled
+ProdId          | Detected device Product ID from reading device registers
+Version         | Detected device Version from reading device registers
+SerialId        | Detected device Serial Number from reading device registers
 ser             | Serial object (before Matlab 2020a) or serialport object (Matlab 2020a or later)
 
 
@@ -323,7 +348,7 @@ gotoSampling    | Go to SAMPLING mode
 printTabular    | Output a table listing with specified scaled sensor data
 readReg         | Read a 16-bit value from specified WIN_ID & register address
 setDeviceCfg    | If not already goto CONFIG mode and program device registers
-swResetDevice   | Issue SW Reset and wait 800 msec
+swResetDevice   | Issue SW Reset and wait RESET_DELAY
 writeRegH       | Write to HIGH byte of specified WIN_ID & register address
 writeRegL       | Write to LOW byte of specified WIN_ID & register address
 
@@ -351,11 +376,12 @@ File                   | Description
 EpsonDeviceUart.m      | Handle object base class for Epson serial sensor device connected by PC serial port controlled by Matlab
 A352Accl.m             | Epson A352 Sensor object derived from base class EpsonDeviceUart
 G320Imu.m              | Epson G320 Sensor object derived from base class EpsonDeviceUart
+G330_G366Imu.m         | Epson G330PDG0/G366PDG0 Sensor object derived from base class EpsonDeviceUart
 G354Imu.m              | Epson G354 Sensor object derived from base class EpsonDeviceUart
 G364Imu.m              | Epson G364PDCA/PDC0 Sensor object derived from base class EpsonDeviceUart
 G365Imu.m              | Epson G365PDF1/PDC1 Sensor object derived from base class EpsonDeviceUart
-G330_G366Imu.m         | Epson G330PDG0/G366PDG0 Sensor object derived from base class EpsonDeviceUart
-G370Imu.m              | Epson G370PDF1/PDS0 Sensor object derived from base class EpsonDeviceUart
+G370F_G370SImu.m       | Epson G370PDF1/PDS0 Sensor object derived from base class EpsonDeviceUart
+G370G_G370TImu.m       | Epson G370PDG0/PDT0 Sensor object derived from base class EpsonDeviceUart
 exampleEpsonAccl.m     | Example matlab script creating Epson Accelerometer serialport object, configure, get sensor samples, print sensor data to console, plot
 exampleEpsonImu.m      | Example matlab script creating Epson IMU serialport object, configure, get sensor samples, print sensor data to console, plot
 createAcclPlot.m       | Plot Accl X,Y,Z axes
@@ -370,3 +396,4 @@ Date       | Version | Description
 -----------|---------|------------
 2021-08-25 |  v1.0   |  Initial release
 2023-01-10 |  v1.01  |  Minor maintenance, add G330/G366 support, fix deltaV scalefactor G365PDC1, formatting
+2023-08-17 |  v1.02  |  Minor maintenance, add G370PDG0/G370PDT0 support, minor renaming of IMU properties
